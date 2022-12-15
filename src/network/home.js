@@ -15,3 +15,4 @@ export function getHomeGoods(type, page) {
     }
   })
 }
+//首页数据的请求
