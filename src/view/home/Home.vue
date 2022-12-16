@@ -50,9 +50,9 @@ export default {
         this.getHomeMultidata()
         // 请求'流行', '新款', '精选'三个的数据
         // 2.请求商品数据
-        this.getHomeGoods('pop');
-        this.getHomeGoods('new');
-        this.getHomeGoods('sell');
+        this.getHomeGoods('pop')
+        this.getHomeGoods('new')
+        this.getHomeGoods('sell')
 
 
     },
@@ -64,13 +64,15 @@ export default {
                 this.recommends = res.data.recommend.list
             })
         },
+        //请求商品的数据
         getHomeGoods(type) {
-            const page = this.goods[type].page + 1;
+            // 设置第几页
+            const page = this.goods[type].page + 1
             getHomeGoods(type, page).then(res => {
-                // push不能直接传入一个数组，会被当成一个元素传入，应该使用遍历push或es6方法
-                this.goods[type].list.push(...res.data.list);
+                //把数据解构然后放进准备好的数组中
+                this.goods[type].list.push(...res.data.list)
+                // 获取页码
                 this.goods[type].page += 1;
-           
             })
         }
     }
