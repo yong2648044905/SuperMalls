@@ -60,6 +60,7 @@ export default {
     border-bottom: 5px solid var(--color-tint);
     color: var(--color-tint);
 }
+
 /* .active {
     color: var(--color-tint);
   }

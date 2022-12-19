@@ -3,16 +3,22 @@
         <nav-bar class="home-nav">
             <div slot="center">购物街</div>
         </nav-bar>
-        <home-swiper :banners="banners" />
-        <recommend-view :recommends="recommends" />
-        <feature-view />
-        <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" />
-        <goods :goods="goods[currentType].list" />
+        <scroll :probeType="3" class="content" ref="scroll" @scroll="scrhandleScrollContentoll" :pullUpLoad="true"
+            @loadMore="loadMoreGoods">
+            <home-swiper :banners="banners" />
+            <recommend-view :recommends="recommends" />
+            <feature-view />
+            <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" />
+            <goods :goods="goods[currentType].list" />
+        </scroll>
+        <back-top @click.native="backClick" v-show="isShowBackTop" />
     </div>
 
 </template>
 
 <script>
+import BackTop from '@/components/common/backTop/BackTop.vue';
+import Scroll from '@/components/common/scroll/Scroll.vue';
 import TabControl from '@/components/content/tabControl/TabControl.vue'
 import NavBar from '@/components/common/navbar/NavBar.vue';
 import Goods from '@/components/content/goods/goods.vue';
@@ -25,6 +31,8 @@ import { getHomeMultidata, getHomeGoods } from '../../network/home'
 export default {
     name: 'Home',
     components: {
+        BackTop,
+        Scroll,
         Goods,
         TabControl,
         NavBar,
@@ -46,7 +54,7 @@ export default {
                 'sell': { page: 0, list: [] },
             },
             currentType: 'pop',
-
+            isShowBackTop: false
 
         }
     },
@@ -61,9 +69,25 @@ export default {
 
     },
     methods: {
+        //下拉加载更多
+
+        loadMoreGoods() {
+            this.getHomeGoods(this.currentType)
+        },
+        // 是否显示backTop图标
+        scrhandleScrollContentoll(position) {
+            // 当滑动的位置大于负1000的时候就是true 显示回到顶部的组件
+            this.isShowBackTop = (-position.y) > 1000
+        },
+
+        // 回到顶部按钮
+        backClick() {
+            this.$refs.scroll.scrollTo(0, 0, 500)
+        },
+
         //点击切换pop new sell
         tabClick(index) {
-            
+
             switch (index) {
                 case 0:
                     this.currentType = 'pop'
@@ -98,6 +122,8 @@ export default {
                 this.goods[type].list.push(...res.data.list)
                 // 获取页码
                 this.goods[type].page += 1;
+                //下拉刷新更多finishPullUp 刷新 scroll中的属性加上这个以后会自动刷新加载
+                this.$refs.scroll.scroll.finishPullUp()
             })
         }
     }
@@ -112,6 +138,7 @@ export default {
     height: 100vh;
 
 }
+
 .home-nav {
     background: var(--color-tint);
     color: #fff;
@@ -120,8 +147,18 @@ export default {
 
 .tab-control {
     /* position: relative; */
-    position: sticky;
-    top: 0;
+    position: relative;
+    z-index: 9;
+}
 
+.content {
+    /* height: 500px; */
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 44px;
+    bottom: 49px;
+    overflow: hidden;
+    /* background: #fff; */
 }
 </style>
