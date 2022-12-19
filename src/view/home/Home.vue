@@ -1,14 +1,13 @@
 <template>
-    <div class="home">
+    <div id="home">
         <nav-bar class="home-nav">
             <div slot="center">购物街</div>
         </nav-bar>
         <home-swiper :banners="banners" />
         <recommend-view :recommends="recommends" />
         <feature-view />
-        <tab-control :titles="['流行', '新款', '精选']" class="tab-control" />
-
-
+        <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" />
+        <goods :goods="goods[currentType].list" />
     </div>
 
 </template>
@@ -16,7 +15,7 @@
 <script>
 import TabControl from '@/components/content/tabControl/TabControl.vue'
 import NavBar from '@/components/common/navbar/NavBar.vue';
-
+import Goods from '@/components/content/goods/goods.vue';
 
 import HomeSwiper from './childComps/HomeSwiper.vue'
 import RecommendView from './childComps/RecommendView.vue'
@@ -26,11 +25,13 @@ import { getHomeMultidata, getHomeGoods } from '../../network/home'
 export default {
     name: 'Home',
     components: {
+        Goods,
         TabControl,
         NavBar,
         HomeSwiper,
         RecommendView,
         FeatureView,
+
 
 
     },
@@ -44,6 +45,9 @@ export default {
                 'new': { page: 0, list: [] },
                 'sell': { page: 0, list: [] },
             },
+            currentType: 'pop',
+
+
         }
     },
     created() {
@@ -57,6 +61,27 @@ export default {
 
     },
     methods: {
+        //点击切换pop new sell
+        tabClick(index) {
+            
+            switch (index) {
+                case 0:
+                    this.currentType = 'pop'
+                    break
+                case 1:
+                    this.currentType = 'new'
+                    break
+                case 2:
+                    this.currentType = 'sell'
+                    break
+            }
+        },
+
+
+
+
+
+
         // 轮播图的请求 
         getHomeMultidata() {
             getHomeMultidata().then(res => {
@@ -81,6 +106,12 @@ export default {
 </script>
 
 <style scoped>
+#home {
+    /* padding-top: 44px; */
+    position: relative;
+    height: 100vh;
+
+}
 .home-nav {
     background: var(--color-tint);
     color: #fff;
@@ -88,7 +119,9 @@ export default {
 }
 
 .tab-control {
+    /* position: relative; */
     position: sticky;
-    top: 40px;
+    top: 0;
+
 }
 </style>

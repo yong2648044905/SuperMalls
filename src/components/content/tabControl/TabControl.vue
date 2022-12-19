@@ -30,7 +30,9 @@ export default {
             //给上面绑定点击事件和遍历的index值一样
             this.currenindex = index
 
+            //把index传递出去来控制这个的点击
 
+            this.$emit("tabClick", index);
         }
     }
 }
@@ -58,4 +60,11 @@ export default {
     border-bottom: 5px solid var(--color-tint);
     color: var(--color-tint);
 }
+/* .active {
+    color: var(--color-tint);
+  }
+
+  .active span {
+    border-bottom: 3px solid var(--color-tint);
+  } */
 </style>
