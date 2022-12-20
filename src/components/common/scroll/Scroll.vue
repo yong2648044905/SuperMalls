@@ -24,7 +24,7 @@ export default {
         },
         pullUpLoad: {
             type: Boolean,
-            default: true
+            default: false
         }
     },
     mounted() {
@@ -49,7 +49,16 @@ export default {
         // 回到顶部监听在那个位置scrollTo
         scrollTo(x, y, time = 300) {
             this.scroll && this.scroll.scrollTo(x, y, time)
+        },
+        //监听图片加载完毕刷新
+        refresh(){
+            this.scroll && this.scroll.refresh();
+        },
+        // 获取滚动的距离
+        getScrollY(){
+            return this.scroll ? this.scroll.y : 0;
         }
+
     }
 }
 </script>

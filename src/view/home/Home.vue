@@ -17,6 +17,7 @@
 </template>
 
 <script>
+import { debounce } from '@/common/utils'
 import BackTop from '@/components/common/backTop/BackTop.vue';
 import Scroll from '@/components/common/scroll/Scroll.vue';
 import TabControl from '@/components/content/tabControl/TabControl.vue'
@@ -58,6 +59,7 @@ export default {
 
         }
     },
+    // 创建页面生命周期
     created() {
         this.getHomeMultidata()
         // 请求'流行', '新款', '精选'三个的数据
@@ -68,11 +70,33 @@ export default {
 
 
     },
-    methods: {
-        //下拉加载更多
+    //挂载的生命周期
+    mounted() {
+        //监听图片加载完毕
+        const refresh = this.debounce(this.$refs.scroll.refresh, 50)
+        this.$bus.$on('itemImgLoad', () => {
+            refresh()
 
+        })
+
+    },
+    methods: {
+        //监听图片加载完毕后刷新解决商品数据请求完毕后下拉刷新不出来的问题。但是现在调用很频繁，每次加载完毕图片就会一直调用很浪费性能
+        debounce(func, delay) {
+            let timer = null
+            return function (...args) {
+                if (timer) clearTimeout(timer)
+                timer = setTimeout(() => {
+                    func.apply(this, args)
+                }, delay)
+            }
+
+        },
+        //下拉加载更多
         loadMoreGoods() {
             this.getHomeGoods(this.currentType)
+      
+            
         },
         // 是否显示backTop图标
         scrhandleScrollContentoll(position) {

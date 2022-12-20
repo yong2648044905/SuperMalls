@@ -1,6 +1,6 @@
 <template>
     <div class="goods-item">
-        <img :src="goodsitem.show.img" alt="">
+        <img :src="goodsitem.show.img" alt="" @load="imgload">
         <div class="goods-info">
             <p class="title">{{ goodsitem.title }}</p>
             <span class="price">{{ goodsitem.price }}</span>
@@ -20,6 +20,12 @@ export default {
             }
         }
 
+    },
+    methods: {
+        // 监听图片加载完毕
+        imgload() {
+            this.$bus.$emit('itemImgLoad')
+        }
     }
 }
 </script>
@@ -30,33 +36,39 @@ export default {
     padding-bottom: 40px;
     width: 48%;
 }
-.goods-item img{
+
+.goods-item img {
     width: 100%;
     border-radius: 8px;
 }
+
 .goods-info {
     text-align: center;
     padding: 3px;
     position: absolute;
     bottom: 0px;
-    left:0;
+    left: 0;
     right: 0;
     overflow: hidden;
     font-size: 14px;
 }
-.goods-info p{
+
+.goods-info p {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
 .goods-info .price {
     color: var(--color-high-text);
     margin-right: 24px;
 }
+
 .goods-info .collect {
     position: relative;
 }
-.goods-info .collect::before{
+
+.goods-info .collect::before {
     content: '';
     position: absolute;
     top: 0;
