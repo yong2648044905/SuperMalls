@@ -1,14 +1,20 @@
 <template>
-<div><h2>detail</h2></div>
+    <div>
+        <detail-nav-bar />
+    </div>
 
 </template>
 
 <script>
+import DetailNavBar from './childComps/DetailNavBar.vue'
 export default {
-    name: 'Detail'
+    name: 'Detail',
+    components: {
+        DetailNavBar,
+    }
 }
 </script>
 
-<style>
+<style scoped>
 
 </style>

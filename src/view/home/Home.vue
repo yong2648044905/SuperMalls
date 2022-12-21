@@ -3,12 +3,14 @@
         <nav-bar class="home-nav">
             <div slot="center">购物街</div>
         </nav-bar>
+        <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" ref="tabcontrol1"
+            v-show="istabFixed" />
         <scroll :probeType="3" class="content" ref="scroll" @scroll="scrhandleScrollContentoll" :pullUpLoad="true"
             @loadMore="loadMoreGoods">
-            <home-swiper :banners="banners" />
+            <home-swiper :banners="banners" @swiperImgLoad="swiperImgLoad" />
             <recommend-view :recommends="recommends" />
             <feature-view />
-            <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" />
+            <tab-control :titles="['流行', '新款', '精选']" @tabClick="tabClick" ref="tabcontrol1" />
             <goods :goods="goods[currentType].list" />
         </scroll>
         <back-top @click.native="backClick" v-show="isShowBackTop" />
@@ -55,7 +57,10 @@ export default {
                 'sell': { page: 0, list: [] },
             },
             currentType: 'pop',
-            isShowBackTop: false
+            isShowBackTop: false,
+            tabControlOffsetTop: 0,
+            istabFixed: false,
+            saveScrollY: 0, //记录页面离开scrollY的距离
 
         }
     },
@@ -78,7 +83,22 @@ export default {
             refresh()
 
         })
+    },
+    // 保留页面的滚动位置
+    activated() {
+        // 判断scroll组件是否有值
+        if (this.$refs.scroll) {
+            //当返回页面的时候调用scrollTO方法返回到saveScrollY记录的地方
+            this.$refs.scroll.scrollTo(0, this.saveScrollY)
+            //返回页面的时候调用一次refresh 刷新才不会出现bug
+            this.$refs.scroll.refresh();
+        }
+    },
 
+    deactivated() {
+        // 当页面停止滚动的时候记录位置当前的位置
+        this.saveScrollY = this.$refs.scroll.getScrollY()
+  
     },
     methods: {
         //监听图片加载完毕后刷新解决商品数据请求完毕后下拉刷新不出来的问题。但是现在调用很频繁，每次加载完毕图片就会一直调用很浪费性能
@@ -92,16 +112,22 @@ export default {
             }
 
         },
+        //当轮播图加载完毕后获取到offsetTop的高度
+        swiperImgLoad() {
+            this.tabControlOffsetTop = this.$refs.tabcontrol1.$el.offsetTop
+            console.log(this.tabControlOffsetTop)
+        },
+
         //下拉加载更多
         loadMoreGoods() {
             this.getHomeGoods(this.currentType)
-      
-            
         },
         // 是否显示backTop图标
         scrhandleScrollContentoll(position) {
             // 当滑动的位置大于负1000的时候就是true 显示回到顶部的组件
             this.isShowBackTop = (-position.y) > 1000
+            //判断是否吸顶    tabControlOffsetTop 记录准确的组件位置
+            this.istabFixed = (-position.y) > this.tabControlOffsetTop
         },
 
         // 回到顶部按钮
@@ -185,4 +211,11 @@ export default {
     overflow: hidden;
     /* background: #fff; */
 }
+
+/* .fixed {
+    position: fixed;
+    right: 0;
+    left: 0;
+    top: 44px;
+} */
 </style>
