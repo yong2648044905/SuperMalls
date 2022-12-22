@@ -1,7 +1,8 @@
 <template>
   <div id="app">
     <main-tab-bar />
-    <keep-alive>
+    <!-- exclude 将这个组件排除会重新的创建 -->
+    <keep-alive exclude="Detail">
       <router-view />
     </keep-alive>
   </div>
