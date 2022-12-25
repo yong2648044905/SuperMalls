@@ -5,7 +5,9 @@
             <detail-swiper :topImages="topImages" />
             <detail-base-info :baseInfo="baseInfo" />
             <detail-shop-info :shopInfo="shopInfo" />
-            <detail-goods-info :goodsInfo="goodsInfo" @goodsInfoImgLoad="goodsInfoImgLoad"/>
+            <detail-goods-info :goodsInfo="goodsInfo" @goodsInfoImgLoad="goodsInfoImgLoad" />
+            <detail-goods-params :goodsParams="goodsParams" />
+            <detail-comment-info :commentInfo="commentInfo" />
         </scroll>
 
     </div>
@@ -21,6 +23,8 @@ import DetailNavBar from './childComps/DetailNavBar.vue'
 import DetailBaseInfo from './childComps/DetailBaseInfo.vue'
 import DetailShopInfo from './childComps/DetailShopInfo.vue'
 import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
+import DetailGoodsParams from './childComps/DetailGoodsParams.vue'
+import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
 
 
 
@@ -28,6 +32,8 @@ import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
 export default {
     name: 'Detail',
     components: {
+        DetailCommentInfo,
+        DetailGoodsParams,
         DetailGoodsInfo,
         DetailNavBar,
         DetailSwiper,
@@ -43,6 +49,8 @@ export default {
             baseInfo: {},
             shopInfo: {},
             goodsInfo: {},
+            goodsParams: {},
+            commentInfo: {}
         }
     },
     created() {
@@ -64,10 +72,17 @@ export default {
                 this.shopInfo = new Shop(data.shopInfo)
                 //获取商品图片的信息
                 this.goodsInfo = data.detailInfo
+                //商品的详情尺码
+                this.goodsParams = data.itemParams
+                // 商品评论信息
+                if (data.rate.cRate !== 0) {
+                    this.commentInfo = data.rate.list[0];
+                }
+
             })
         },
         // 监听图片加载完毕，刷新列表高度
-        goodsInfoImgLoad(){
+        goodsInfoImgLoad() {
             this.$refs.scroll.refresh()
         }
     }
