@@ -31,7 +31,6 @@ export default {
             this.currenindex = index
 
             //把index传递出去来控制这个的点击
-
             this.$emit("tabClick", index);
         }
     }

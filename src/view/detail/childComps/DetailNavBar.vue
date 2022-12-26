@@ -32,6 +32,7 @@ export default {
     methods: {
         titleClick(index) {
             this.curretindex = index
+            this.$emit('tabClick',index,500)
         },
         backHome() {
             this.$router.push('/home');

@@ -1,6 +1,6 @@
 <template>
     <div class="goods-item" @click="itmeClick">
-        <img :src="goodsitem.show.img" alt="" @load="imgload">
+        <img :src="(goodsitem.show && goodsitem.show.img) || goodsitem.image" alt="" @load="imgload">
         <div class="goods-info">
             <p class="title">{{ goodsitem.title }}</p>
             <span class="price">{{ goodsitem.price }}</span>

@@ -3,7 +3,7 @@
         <nav-bar class="home-nav">
             <div slot="center">购物街</div>
         </nav-bar>
-        <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" ref="tabcontrol1"
+        <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabClick="tabClick" ref="tabcontrol2"
             v-show="istabFixed" />
         <scroll :probeType="3" class="content" ref="scroll" @scroll="scrhandleScrollContentoll" :pullUpLoad="true"
             @loadMore="loadMoreGoods">
@@ -31,6 +31,8 @@ import RecommendView from './childComps/RecommendView.vue'
 import FeatureView from './childComps/FeatureView.vue';
 
 import { getHomeMultidata, getHomeGoods } from '../../network/home'
+import { itemListenerMixin } from '@/common/mixin';
+
 export default {
     name: 'Home',
     components: {
@@ -46,6 +48,7 @@ export default {
 
 
     },
+    mixins: [itemListenerMixin],
 
     data() {
         return {
@@ -61,6 +64,7 @@ export default {
             tabControlOffsetTop: 0,
             istabFixed: false,
             saveScrollY: 0, //记录页面离开scrollY的距离
+            imgItemListener: null, //控制首页商品图片加载显示的listener
 
         }
     },
@@ -78,11 +82,12 @@ export default {
     //挂载的生命周期
     mounted() {
         //监听图片加载完毕
-        const refresh = this.debounce(this.$refs.scroll.refresh, 50)
-        this.$bus.$on('itemImgLoad', () => {
-            refresh()
+        // const refresh = this.debounce(this.$refs.scroll.refresh, 50)
+        // this.imgItemListener = () => {
+        //     refresh()
 
-        })
+        // }
+        // this.$bus.$on('itemImgLoad', this.imgItemListener)
     },
     // 保留页面的滚动位置
     activated() {
@@ -98,7 +103,8 @@ export default {
     deactivated() {
         // 当页面停止滚动的时候记录位置当前的位置
         this.saveScrollY = this.$refs.scroll.getScrollY()
-  
+        //取消全局事件的监听
+        this.$bus.$off('itemImgLoad', this.imgItemListener)
     },
     methods: {
         //监听图片加载完毕后刷新解决商品数据请求完毕后下拉刷新不出来的问题。但是现在调用很频繁，每次加载完毕图片就会一直调用很浪费性能
@@ -149,6 +155,10 @@ export default {
                     this.currentType = 'sell'
                     break
             }
+            // 让两个导航栏都统一index
+            this.$refs.tabcontrol1.currenindex = index
+            this.$refs.tabcontrol2.currenindex = index
+
         },
 
 

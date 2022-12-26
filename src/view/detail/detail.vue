@@ -1,13 +1,14 @@
 <template>
     <div class="detail">
-        <detail-nav-bar class="detail-bar" />
-        <scroll class="content" ref="scroll">
+        <detail-nav-bar class="detail-bar" @tabClick="tabClick" ref="nav" />
+        <scroll class="content" ref="scroll" :probeType="3" @scroll="handleScrollContent">
             <detail-swiper :topImages="topImages" />
             <detail-base-info :baseInfo="baseInfo" />
             <detail-shop-info :shopInfo="shopInfo" />
             <detail-goods-info :goodsInfo="goodsInfo" @goodsInfoImgLoad="goodsInfoImgLoad" />
-            <detail-goods-params :goodsParams="goodsParams" />
-            <detail-comment-info :commentInfo="commentInfo" />
+            <detail-goods-params :goodsParams="goodsParams" ref="goodsParams" />
+            <detail-comment-info :commentInfo="commentInfo" ref="goodsComment" />
+            <detail-recommend :recommendList="recommendList" ref="goodsRecommend" />
         </scroll>
 
     </div>
@@ -15,8 +16,10 @@
 </template>
 
 <script>
+
+
 import Scroll from '@/components/common/scroll/Scroll';
-import { getGoodsDetail, Goods, Shop } from '@/network/detail'
+import { getGoodsDetail, getGoodsRecommend, Goods, Shop } from '@/network/detail'//数据的请求
 
 import DetailSwiper from './childComps/DetailSwiper.vue'
 import DetailNavBar from './childComps/DetailNavBar.vue'
@@ -25,13 +28,19 @@ import DetailShopInfo from './childComps/DetailShopInfo.vue'
 import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
 import DetailGoodsParams from './childComps/DetailGoodsParams.vue'
 import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
+import DetailRecommend from './childComps/DetailRecommend.vue'
 
 
+
+import { debounce } from '@/common/utils';//防抖
+import { itemListenerMixin } from '@/common/mixin';//混入
 
 
 export default {
     name: 'Detail',
     components: {
+        // DetailRecommend,
+        DetailRecommend,
         DetailCommentInfo,
         DetailGoodsParams,
         DetailGoodsInfo,
@@ -42,6 +51,7 @@ export default {
 
         Scroll,
     },
+    mixins: [itemListenerMixin],
     data() {
         return {
             iid: null,
@@ -50,19 +60,85 @@ export default {
             shopInfo: {},
             goodsInfo: {},
             goodsParams: {},
-            commentInfo: {}
+            commentInfo: {},
+            recommendList: [],
+            themeTopYs: [0],    //记录商品,参数，评论，推荐的offsetTop
+            imgItemListener: null,
+            currentIndex: 0,
+
         }
+    },
+    mounted() {
+        // 已经在上面进行了混入，
+        // const refresh = debounce(this.$refs.scroll.refresh, 50)
+        // this.imgItemListener = () => {
+        //     refresh()
+
+        // }
+        // this.$bus.$on('itemImgLoad', this.imgItemListener);
+    },
+    destroyed() {
+        // 取消详情页推荐商品事件总线的监听，与首页商品列表区分开
+        this.$bus.$off('itemImgLoad', this.imgItemListener);
     },
     created() {
         // 保存存入的iid
         this.iid = this.$route.params.iid
         // 获取商品信息
-        this.getGoodsDetail()
+        this.getGoodsDetail();
+        //商品推荐数据请求
+        this.getGoodsRecommend();
+        // 3.给getThemeTopY赋值(防抖)
+        this.getThemeTopY();
     },
+
     methods: {
+        // 监听图片加载完毕，刷新列表高度
+        goodsInfoImgLoad() {
+            //在图片加载完成以后监听高度            // 需要在商品详情图片加载完成再获取各个部分的offsetTop
+            // 需要在商品详情图片加载完成再获取各个部分的offsetTop  
+            this.getThemeTopY()
+            // 刷新
+            this.refresh()
+
+        },
+        // 顶部导航的点击
+        tabClick(index) {
+            this.$refs.scroll.scrollTo(0, -this.themeTopYs[index])
+        },
+        // 3.给getThemeTopY赋值(防抖)
+        getThemeTopY() {
+            this.getThemeTopY = debounce(() => {
+                this.themeTopYs = [];
+                this.themeTopYs.push(0);
+                this.themeTopYs.push(this.$refs.goodsParams.$el.offsetTop, this.$refs.goodsComment.$el.offsetTop, this.$refs.goodsRecommend.$el.offsetTop);
+                this.themeTopYs.push(Number.MAX_VALUE);
+                // console.log(this.themeTopYs);
+            })
+
+        },
+        //处理滚动事件
+        handleScrollContent(position) {
+            // 获取到y值
+            let positionY = -position.y;
+            //获取到对应的长度
+            let length = this.themeTopYs.length;
+            //遍历出对应的index值
+            for (let i = 0; i < length; i++) {
+                if (this.currentIndex !== i && positionY >= this.themeTopYs[i] && positionY < this.themeTopYs[i + 1]) {
+                    this.currentIndex = i;  //记录滚动到某个具体的栏目参
+                    this.$refs.nav.curretindex = i;// 对应的index值和组件中的一样
+
+                }
+            }
+
+        },
+
+
+        // 商品的请求
         getGoodsDetail() {
             getGoodsDetail(this.iid).then(res => {
-                console.log(res)
+                // console.log(res)
                 let data = res.result;
                 //请求轮播图的数据
                 this.topImages = data.itemInfo.topImages;
@@ -81,11 +157,15 @@ export default {
 
             })
         },
-        // 监听图片加载完毕，刷新列表高度
-        goodsInfoImgLoad() {
-            this.$refs.scroll.refresh()
+
+        // 推荐数据的请求
+        getGoodsRecommend() {
+            getGoodsRecommend().then(ref => {
+                this.recommendList = ref.data.list
+                // console.log(this.recommendList)
+            })
         }
-    }
+    },
 }
 </script>
 
