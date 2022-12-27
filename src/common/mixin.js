@@ -17,3 +17,18 @@ export const itemListenerMixin = {
         this.$bus.$on('itemImgLoad', this.imgItemListener)
     },
 }
+
+//BackTop 组件的混入
+export const backTopMixin = {
+    data() {
+        return {
+            isShowBackTop: false,
+        }
+    },
+    methods: {
+        // 回到顶部按钮
+        backClick() {
+            this.$refs.scroll.scrollTo(0, 0, 500)
+        },
+    },
+}

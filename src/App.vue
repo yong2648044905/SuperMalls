@@ -3,8 +3,9 @@
     <main-tab-bar />
     <!-- exclude 将这个组件排除会重新的创建 -->
     <keep-alive exclude="Detail">
-      <router-view />
+      <router-view/>
     </keep-alive>
+    <main-tab-bar/>
   </div>
 </template>
 

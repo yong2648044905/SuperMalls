@@ -1,7 +1,12 @@
 <template>
-    <div class="detail">
+    <div id="detail">
         <detail-nav-bar class="detail-bar" @tabClick="tabClick" ref="nav" />
         <scroll class="content" ref="scroll" :probeType="3" @scroll="handleScrollContent">
+            <div>
+                <ul>
+                    <li v-for="(item, index) in $store.state.cartList" :key="index"> {{ item }}</li>
+                </ul>
+            </div>
             <detail-swiper :topImages="topImages" />
             <detail-base-info :baseInfo="baseInfo" />
             <detail-shop-info :shopInfo="shopInfo" />
@@ -10,12 +15,15 @@
             <detail-comment-info :commentInfo="commentInfo" ref="goodsComment" />
             <detail-recommend :recommendList="recommendList" ref="goodsRecommend" />
         </scroll>
+        <detail-bottom-bar @addCart="addCart" />
+        <back-top @click.native="backClick" v-show="isShowBackTop" />
 
     </div>
 
 </template>
 
 <script>
+import BackTop from '@/components/common/backTop/BackTop.vue';
 
 
 import Scroll from '@/components/common/scroll/Scroll';
@@ -29,17 +37,18 @@ import DetailGoodsInfo from './childComps/DetailGoodsInfo.vue'
 import DetailGoodsParams from './childComps/DetailGoodsParams.vue'
 import DetailCommentInfo from './childComps/DetailCommentInfo.vue'
 import DetailRecommend from './childComps/DetailRecommend.vue'
+import DetailBottomBar from './childComps/DetailBottomBar.vue'
 
 
 
 import { debounce } from '@/common/utils';//防抖
-import { itemListenerMixin } from '@/common/mixin';//混入
+import { itemListenerMixin, backTopMixin } from '@/common/mixin';//混入
 
 
 export default {
     name: 'Detail',
     components: {
-        // DetailRecommend,
+        DetailBottomBar,
         DetailRecommend,
         DetailCommentInfo,
         DetailGoodsParams,
@@ -50,8 +59,9 @@ export default {
         DetailShopInfo,
 
         Scroll,
+        BackTop
     },
-    mixins: [itemListenerMixin],
+    mixins: [itemListenerMixin, backTopMixin],
     data() {
         return {
             iid: null,
@@ -131,9 +141,14 @@ export default {
 
                 }
             }
-
+            // 混入的使用
+            // 当滑动的位置大于负1000的时候就是true 显示回到顶部的组件
+            this.isShowBackTop = (-position.y) > 1000
         },
-
+        // // 回到顶部
+        // backClick() {
+        //     this.$refs.scroll.scrollTo(0, 0, 500)
+        // },
 
         // 商品的请求
         getGoodsDetail() {
@@ -157,6 +172,23 @@ export default {
 
             })
         },
+        //加入购物车 ， 截取上面的数据给vuex进行同意的管理来实现
+        //监听加入购物车的点击事件
+        addCart() {
+            // 把需要的数据存进product 中
+            const product = {};
+            product.image = this.topImages[0];
+            product.title = this.baseInfo.title;
+            product.desc = this.baseInfo.desc;
+            product.price = this.baseInfo.newPrice;
+            product.iid = this.baseInfo.iid;
+            product.realPrice = this.baseInfo.realPrice;
+            // 通过commit来改变vuex的数组
+            this.$store.commit('addCart', product)
+        },
+
+
+
 
         // 推荐数据的请求
         getGoodsRecommend() {
@@ -170,8 +202,8 @@ export default {
 </script>
 
 <style scoped>
-.detail {
-    height: 100vh;
+#detail {
+    height: 115vh;
     position: relative;
     background: #fff;
     z-index: 9;
