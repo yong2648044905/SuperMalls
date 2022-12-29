@@ -2,11 +2,6 @@
     <div id="detail">
         <detail-nav-bar class="detail-bar" @tabClick="tabClick" ref="nav" />
         <scroll class="content" ref="scroll" :probeType="3" @scroll="handleScrollContent">
-            <div>
-                <ul>
-                    <li v-for="(item, index) in $store.state.cartList" :key="index"> {{ item }}</li>
-                </ul>
-            </div>
             <detail-swiper :topImages="topImages" />
             <detail-base-info :baseInfo="baseInfo" />
             <detail-shop-info :shopInfo="shopInfo" />
@@ -183,8 +178,9 @@ export default {
             product.price = this.baseInfo.newPrice;
             product.iid = this.baseInfo.iid;
             product.realPrice = this.baseInfo.realPrice;
-            // 通过commit来改变vuex的数组
-            this.$store.commit('addCart', product)
+            // 通过commit来改变vuex的数组   
+            //dispatch 派发事件
+            this.$store.dispatch('addCart', product)
         },
 
 
