@@ -1,14 +1,26 @@
 <template>
-<div><h2>我的</h2></div>
+    <div class="profile">
+        <nav-bar>
+            <div slot="center">个人中心</div>
+        </nav-bar>
+    </div>
 
 </template>
 
 <script>
+import NavBar from '@/components/common/navbar/NavBar.vue'
 export default {
-    name: "Profile"
+    name: "Profile",
+    components: {
+        NavBar
+    }
 }
+
 </script>
 
-<style>
-
+<style scoped>
+.profile-bar {
+    background: var(--color-tint);
+    color: #fff;
+}
 </style>
